@@ -50,22 +50,37 @@ class Game:
 
     def is_valid_move(self, move):
         """Return True if move is valid, and False otherwise."""
-        row, col = move.row, move.col
+        row, col = move.row, move.col 
+        
         # TODO: check that the current move has not been played already 
         # and that there is no winner yet. Note that non-played cells
         # contain an empty string (i.e. ""). 
         # Use variables no_winner and move_not_played.
         
+        move_not_played=self._current_moves[row][col]
+        no_winner= not self._has_winner
         return no_winner and move_not_played
 
     def process_move(self, move):
         """Process the current move and check if it's a win."""
         row, col = move.row, move.col
         self._current_moves[row][col] = move
+        
         # TODO: check whether the current move leads to a winning combo.
         # Do not return any values but set variables  self._has_winner 
         # and self.winner_combo in case of winning combo.
         # Hint: you can scan pre-computed winning combos in self._winning_combos
+        
+        for combo in self._winning_combos:
+            results = set(
+                self._current_moves[n][m].label
+                for n, m in combo
+            )
+            is_win = (len(results) == 1) and ("" not in results)
+            if is_win:
+                self._has_winner = True
+                self.winner_combo = combo
+                break
 
 
     def has_winner(self):
@@ -76,12 +91,16 @@ class Game:
         """Return True if the game is tied, and False otherwise."""
         # TODO: check whether a tie was reached.
         # There is no winner and all moves have been tried.
-
+        no_winner=not self._has_winner
+        played_moves=(move.label for row in self._current_moves for move in row)
+        return no_winner and all(played_moves)
+    
     def toggle_player(self):
         """Return a toggled player."""
         # TODO: switches self.current_player to the other player.
         # Hint: https://docs.python.org/3/library/functions.html#next
-       
+        self.current_player=next(self._players)
+        
     def reset_game(self):
         """Reset the game state to play again."""
         for row, row_content in enumerate(self._current_moves):
